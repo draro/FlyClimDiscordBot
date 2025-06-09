@@ -1,58 +1,53 @@
 import discord
+from discord import app_commands
+from discord.ext import commands
 import os
 import requests
 from dotenv import load_dotenv
 from datetime import datetime, timezone
 
 load_dotenv()
+TOKEN = os.getenv("DISCORD_TOKEN")
+API_URL = os.getenv("FLYCLIM_API")
 
-DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-API_URL = os.getenv("FLYCLIM_API")  # e.g. https://demo.flyclim.com/api/bot/check-fpl
+class FlyClimBot(commands.Bot):
+    def __init__(self):
+        intents = discord.Intents.default()
+        super().__init__(command_prefix="/", intents=intents)
+        self.tree = app_commands.CommandTree(self)
 
-intents = discord.Intents.default()
-client = discord.Client(intents=intents)
+    async def setup_hook(self):
+        await self.tree.sync()
+        print("✅ Slash commands synced.")
 
-@client.event
-async def on_ready():
-    print(f"✅ Bot is live as {client.user}")
+bot = FlyClimBot()
 
-@client.event
-async def on_message(message):
-    if message.author.bot:
-        return
+@bot.tree.command(name="fpl", description="Check storm risk for an ICAO flight plan")
+@app_commands.describe(fpl_string="Paste the full FPL string")
+async def fpl_command(interaction: discord.Interaction, fpl_string: str):
+    await interaction.response.defer(thinking=True)
 
-    if message.content.startswith("/fpl "):
-        fpl = message.content[5:].strip()
-        await message.channel.send("🛫 Processing FPL...\nPlease wait...")
-
-        try:
-            payload = {
-                "fpl": fpl,
-                "departure_time": datetime.now(timezone.utc).isoformat()
-            }
-
-            res = requests.post(API_URL, json=payload)
-            if res.ok:
-                data = res.json()
-                storm_hits = data.get("collisions", [])
-                storm_detected = data.get("storm_detected", False)
-
-                if storm_detected and storm_hits:
-                    segments = "\n".join(
-                        f"• `{hit['segment_label']}` at {hit['timestamp']} UTC"
-                        for hit in storm_hits
-                    )
-                    msg = f"""
-⚠️ **Storms detected along route**
-{segments}
-"""
-                else:
-                    msg = "✅ No storm impact detected along the route."
-
-                await message.channel.send(msg.strip())
+    try:
+        payload = {
+            "fpl": fpl_string,
+            "departure_time": datetime.now(timezone.utc).isoformat()
+        }
+        res = requests.post(API_URL, json=payload)
+        if res.ok:
+            data = res.json()
+            storm_hits = data.get("collisions", [])
+            if storm_hits:
+                segments = "\n".join(
+                    f"• `{hit['segment_label']}` at {hit['timestamp']} UTC"
+                    for hit in storm_hits
+                )
+                msg = f"⚠️ **Storms detected:**\n{segments}"
             else:
-                await message.channel.send("❌ API error while checking FPL.")
-        except Exception as e:
-            await message.channel.send(f"🚨 Exception occurred: {e}")
+                msg = "✅ No storm impact detected along the route."
+            await interaction.followup.send(msg)
+        else:
+            await interaction.followup.send("❌ API error.")
+    except Exception as e:
+        await interaction.followup.send(f"🚨 Error: {e}")
 
-client.run(DISCORD_TOKEN)
+bot.run(TOKEN)
