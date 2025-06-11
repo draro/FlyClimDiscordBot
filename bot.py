@@ -39,6 +39,7 @@ async def fpl_command(interaction: discord.Interaction, fpl_string: str):
 
         if res.ok:
             data = res.json()
+            print(f"Received data: {data}")
             storm_hits = data.get("collisions", [])
             if storm_hits:
                 segments = "\n".join(
