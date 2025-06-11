@@ -33,7 +33,7 @@ async def fpl_command(interaction: discord.Interaction, fpl_string: str):
     try:
         payload = {
             "fpl": fpl_string,
-            "departure_time": datetime.now(timezone.utc).isoformat()
+            # "departure_time": datetime.now(timezone.utc).isoformat()
         }
         res = requests.post(FLYCLIM_API, json=payload)
 
