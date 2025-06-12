@@ -15,9 +15,11 @@ intents = discord.Intents.default()
 client = discord.Client(intents=intents)
 
 @client.event
+@client.event
 async def on_ready():
     print(f"🚀 Logged in as {client.user}")
-    post_pilot_jobs.start()
+    if not post_pilot_jobs.is_running():
+        post_pilot_jobs.start()
 
 @tasks.loop(hours=1)  # Run every 6 hours
 async def post_pilot_jobs():
