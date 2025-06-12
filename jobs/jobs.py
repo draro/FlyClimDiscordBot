@@ -11,7 +11,7 @@ def scrape_pilot_jobs_last_day(keyword):
         results_wanted=200,
         hours_old=4,
         # linkedin_fetch_description=True,
-        company_industry=["Airlines/Aviation", "Aviation & Aerospace"],
+        company_industry="Airlines/Aviation",
     )
     print(f"Total jobs scraped: {len(jobs)}")
     print(f"Jobs DataFrame:\n{jobs.iloc[0].to_dict()}")
