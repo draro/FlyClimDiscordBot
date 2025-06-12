@@ -8,14 +8,16 @@ def scrape_pilot_jobs_last_day(keyword):
         site_name=["linkedin"],
         search_term=keyword,
         # location="worldwide",
-        results_wanted=200,
+        results_wanted=1000,
         hours_old=1,
         # linkedin_fetch_description=True,
         company_industry="Airlines/Aviation",
     )
     print(f"Total jobs scraped: {len(jobs)}")
-    print(f"Jobs DataFrame:\n{jobs.iloc[0].to_dict()}")
+    # print(f"Jobs DataFrame:\n{jobs.iloc[0].to_dict()}")
     # Filter: must contain 'pilot' in the job title (case-insensitive)
+    if jobs.empty:
+        return pd.DataFrame()
     jobs = jobs[jobs['title'].str.lower().str.contains(keyword, na=False)]
 
     return jobs

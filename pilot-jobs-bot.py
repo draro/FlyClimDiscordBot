@@ -36,7 +36,9 @@ async def post_pilot_jobs():
         embed = discord.Embed(
             title=row.get('title', 'Pilot Opportunity'),
             url=row.get('job_url') or row.get('job_url_direct'),
-            description=(row.get('description')[:300] + '...') if row.get('description') else "No description available.",
+            description = (
+    row['description'][:300] + '...' if isinstance(row.get('description'), str)
+    else "No description available."),
             color=discord.Color.blue()
         )
 
