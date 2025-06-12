@@ -9,7 +9,7 @@ def scrape_pilot_jobs_last_day(keyword):
         search_term=keyword,
         # location="worldwide",
         results_wanted=200,
-        hours_old=4,
+        hours_old=1,
         # linkedin_fetch_description=True,
         company_industry="Airlines/Aviation",
     )

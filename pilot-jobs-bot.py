@@ -19,7 +19,7 @@ async def on_ready():
     print(f"🚀 Logged in as {client.user}")
     post_pilot_jobs.start()
 
-@tasks.loop(hours=6)  # Run every 6 hours
+@tasks.loop(hours=1)  # Run every 6 hours
 async def post_pilot_jobs():
     print("🔍 Searching for pilot job openings...")
     channel = client.get_channel(CHANNEL_ID)
