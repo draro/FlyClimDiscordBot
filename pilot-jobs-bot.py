@@ -27,7 +27,7 @@ async def post_pilot_jobs():
     # Placeholder for actual job search logic (e.g., web scraping, API call)
     jobs = get_latest_pilot_jobs()
 
-    for _, row in jobs_df.iterrows():
+    for _, row in jobs.iterrows():
         title = row['title']
         company = row['company']
         location = ", ".join(filter(None, [row['location']]))
