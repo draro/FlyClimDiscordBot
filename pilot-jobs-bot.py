@@ -25,8 +25,9 @@ async def on_ready():
 async def post_pilot_jobs():
     print("🔍 Searching for pilot job openings...")
     channel = client.get_channel(CHANNEL_ID)
+    keywords = ["pilot", "airline pilot", "commercial pilot", "private pilot", "flight instructor"]
 
-    jobs = get_latest_pilot_jobs()
+    jobs = get_latest_pilot_jobs(keywords=keywords)
 
     if jobs.empty:
         # await channel.send("❌ No new pilot jobs found in the last 24 hours.")

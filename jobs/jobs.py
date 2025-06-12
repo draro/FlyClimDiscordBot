@@ -44,9 +44,8 @@ def format_jobs_for_discord(jobs_df: pd.DataFrame) -> str:
 
 
 # if __name__ == "__main__":
-def get_latest_pilot_jobs():
+def get_latest_pilot_jobs(keywords):
     # Keywords to search for pilot jobs
-    keywords = ["pilot", "airline pilot", "commercial pilot", "private pilot", "flight instructor"]
     all_jobs = []
 
     for keyword in keywords:
