@@ -25,7 +25,7 @@ async def post_pilot_jobs():
     channel = client.get_channel(CHANNEL_ID)
 
     # Placeholder for actual job search logic (e.g., web scraping, API call)
-    jobs = get_latest_pilot_jobs()
+    jobs = await get_latest_pilot_jobs()
 
     for _, row in jobs.iterrows():
         title = row['title']
