@@ -3,6 +3,9 @@ from discord.ext import tasks
 import os
 import requests
 from dotenv import load_dotenv
+import pandas as pd
+
+from jobs.jobs import get_latest_pilot_jobs
 load_dotenv()
 
 DISCORD_TOKEN = os.getenv("JOB_TOKEN")
@@ -22,13 +25,17 @@ async def post_pilot_jobs():
     channel = client.get_channel(CHANNEL_ID)
 
     # Placeholder for actual job search logic (e.g., web scraping, API call)
-    jobs = [
-        {"title": "First Officer - A320", "company": "Lufthansa", "url": "https://example.com/job1"},
-        {"title": "Captain - B737", "company": "Ryanair", "url": "https://example.com/job2"}
-    ]
+    jobs = get_latest_pilot_jobs()
 
-    for job in jobs:
-        msg = f"📌 **{job['title']}** at **{job['company']}**\n🔗 {job['url']}"
-        await channel.send(msg)
+    for _, row in jobs_df.iterrows():
+        title = row['title']
+        company = row['company']
+        location = ", ".join(filter(None, [row['location']]))
+        url = row['job_url']
+        # posted = row['date_posted'].strftime("%Y-%m-%d") if pd.notnull(row['date_posted']) else "N/A"
+
+        await channel.send(
+            f"📌 **{title}**\n🏢 {company}\n📍 {location or 'Unknown'}\n🔗 {url}\n"
+        )
 
 client.run(DISCORD_TOKEN)
