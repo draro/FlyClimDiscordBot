@@ -1,58 +1,57 @@
-import discord
-from discord.ext import tasks
-import os
-from dotenv import load_dotenv
+from jobspy import scrape_jobs
 import pandas as pd
+from datetime import datetime, timedelta
 
-from jobs.jobs import get_latest_pilot_jobs
+def scrape_pilot_jobs_last_day(keyword):
+    # Scrape up to 50 jobs posted in the last 24 hours with 'pilot' in the title
+    jobs = scrape_jobs(
+        site_name=["linkedin"],
+        search_term=keyword,
+        # location="worldwide",
+        results_wanted=200,
+        hours_old=4,
+        # linkedin_fetch_description=True,
+        company_industry=["Airlines/Aviation", "Aviation & Aerospace"],
+    )
+    print(f"Total jobs scraped: {len(jobs)}")
+    print(f"Jobs DataFrame:\n{jobs.iloc[0].to_dict()}")
+    # Filter: must contain 'pilot' in the job title (case-insensitive)
+    jobs = jobs[jobs['title'].str.lower().str.contains(keyword, na=False)]
 
-load_dotenv()
+    return jobs
 
-DISCORD_TOKEN = os.getenv("JOB_TOKEN")
-CHANNEL_ID = 1382633883882885232  # Your Discord channel ID
 
-intents = discord.Intents.default()
-client = discord.Client(intents=intents)
+def format_jobs_for_discord(jobs_df: pd.DataFrame) -> str:
+    if jobs_df.empty:
+        return "❌ No new pilot jobs found in the last 24 hours."
 
-@client.event
-async def on_ready():
-    print(f"🚀 Logged in as {client.user}")
-    post_pilot_jobs.start()
+    lines = ["**✈️ Latest Pilot Jobs  in LinkedIn (Last 2h)**\n"]
 
-@tasks.loop(hours=6)  # Run every 6 hours
-async def post_pilot_jobs():
-    print("🔍 Searching for pilot job openings...")
-    channel = client.get_channel(CHANNEL_ID)
+    for _, row in jobs_df.iterrows():
+        title = row['title']
+        company = row['company']
+        location = ", ".join(filter(None, [row['location']]))
+        url = row['job_url']
+        posted = row['date_posted'].strftime("%Y-%m-%d") if pd.notnull(row['date_posted']) else "N/A"
 
-    jobs = get_latest_pilot_jobs()
-
-    if jobs.empty:
-        # await channel.send("❌ No new pilot jobs found in the last 24 hours.")
-        return
-
-    for _, row in jobs.iterrows():
-        embed = discord.Embed(
-            title=row.get('title', 'Pilot Opportunity'),
-            url=row.get('job_url') or row.get('job_url_direct'),
-            description=(row.get('description')[:300] + '...') if row.get('description') else "No description available.",
-            color=discord.Color.blue()
+        lines.append(
+            f"📌 **{title}**\n🏢 {company}\n📍 {location or 'Unknown'}\n🕒 {posted}\n🔗 {url}\n"
         )
 
-        embed.set_author(name=row.get('company', 'Unknown Company'))
+    return "\n".join(lines)
 
-        if row.get('company_logo'):
-            embed.set_thumbnail(url=row['company_logo'])
 
-        embed.add_field(name="📍 Location", value=row.get('location', 'Unknown'), inline=True)
-        embed.add_field(name="🏢 Company", value=row.get('company', 'Unknown'), inline=True)
-        embed.add_field(name="💼 Job Type", value=row.get('job_type', 'Not specified'), inline=True)
+# if __name__ == "__main__":
+def get_latest_pilot_jobs():
+    # Keywords to search for pilot jobs
+    keywords = ["pilot", "airline pilot", "commercial pilot", "private pilot", "flight instructor"]
+    all_jobs = []
 
-        if pd.notnull(row.get('date_posted')):
-            embed.add_field(name="🕒 Date Posted", value=row['date_posted'].strftime('%Y-%m-%d'), inline=True)
-
-        if row.get('is_remote') is not None:
-            embed.add_field(name="🏠 Remote", value="Yes" if row['is_remote'] else "No", inline=True)
-
-        await channel.send(embed=embed)
-
-client.run(DISCORD_TOKEN)
+    for keyword in keywords:
+        print(f"Scraping jobs for keyword: {keyword}")
+        jobs_df = scrape_pilot_jobs_last_day(keyword)
+        all_jobs.append(jobs_df)
+    if all_jobs:
+        combined_df = pd.concat(all_jobs, ignore_index=True).drop_duplicates(subset="job_url")
+        # discord_message = format_jobs_for_discord(combined_df)
+        return combined_df
