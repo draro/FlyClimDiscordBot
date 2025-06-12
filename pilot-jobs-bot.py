@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DISCORD_TOKEN = os.getenv("JOB_TOKEN")
-CHANNEL_ID = int(1382633883882885232)  # Your channel ID
+CHANNEL_ID = 1382633883882885232  # Your channel ID
 print("DISCORD_TOKEN:", DISCORD_TOKEN)
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
