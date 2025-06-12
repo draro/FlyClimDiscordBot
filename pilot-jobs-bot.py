@@ -31,4 +31,4 @@ async def post_pilot_jobs():
         msg = f"📌 **{job['title']}** at **{job['company']}**\n🔗 {job['url']}"
         await channel.send(msg)
 
-client.run(JOB_TOKEN)
+client.run(DISCORD_TOKEN)
