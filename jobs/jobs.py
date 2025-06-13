@@ -86,7 +86,8 @@ def get_latest_pilot_jobs(keywords,site_name=["indeed"]):
         return combined_df
 
 if __name__ == "__main__":
-    keywords = ["aircraft engineer", "aviation technical manager", "aviation project manager", "aviation safety manager", "aviation quality manager", "aviation maintenance manager", "aviation operations manager", "aviation logistics manager", "aviation supply chain manager", "aviation procurement manager"]
+    keywords = ["Flight Dispatcher", "Flight Operations Officer", "Flight Operations Controller", "Flight Operations Specialist"]
+
     latest_jobs = get_latest_pilot_jobs(keywords, site_name=[ "linkedin"])
     if not latest_jobs.empty:
         print(format_jobs_for_discord(latest_jobs))
