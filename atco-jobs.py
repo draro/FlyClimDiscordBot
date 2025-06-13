@@ -8,8 +8,8 @@ from jobs.jobs import get_latest_pilot_jobs
 
 load_dotenv()
 
-DISCORD_TOKEN = os.getenv("JOB_TOKEN")
-CHANNEL_ID = 1382633883882885232  # Your Discord channel ID
+DISCORD_TOKEN = os.getenv("ATCO_JOBS")
+CHANNEL_ID = 1383132439920251021  # Your Discord channel ID
 
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
@@ -25,7 +25,7 @@ async def on_ready():
 async def post_pilot_jobs():
     print("🔍 Searching for pilot job openings...")
     channel = client.get_channel(CHANNEL_ID)
-    keywords = ["pilot", "airline pilot", "commercial pilot", "private pilot", "flight instructor"]
+    keywords = ["Air traffic Controller", "ATCO", "Air Traffic Control"]
 
     jobs = get_latest_pilot_jobs(keywords=keywords, site_name=["linkedin"])
 

@@ -2,27 +2,55 @@ from jobspy import scrape_jobs
 import pandas as pd
 from datetime import datetime, timedelta
 
-def scrape_pilot_jobs_last_day(keyword):
-    # Scrape up to 50 jobs posted in the last 24 hours with 'pilot' in the title
-    jobs = scrape_jobs(
-        site_name=["linkedin"],
-        search_term=keyword,
-        # location="worldwide",
-        results_wanted=1000,
-        hours_old=1,
-        # linkedin_fetch_description=True,
-        company_industry="Airlines/Aviation",
-    )
-    print(f"Total jobs scraped: {len(jobs)}")
-    # print(f"Jobs DataFrame:\n{jobs.iloc[0].to_dict()}")
-    # Filter: must contain 'pilot' in the job title (case-insensitive)
-    if jobs.empty:
+def scrape_pilot_jobs_last_day(keyword: str, site_names=["indeed", "linkedin"]) -> pd.DataFrame:
+    all_jobs = []
+
+    for site in site_names:
+        print(f"🔍 Scraping {site} for '{keyword}' jobs...")
+        try:
+            if site == "linkedin":
+                print("Scraping LinkedIn...")
+                jobs = scrape_jobs(
+                    site_name=["linkedin"],
+                    search_term=keyword,
+                    results_wanted=1000,
+                    hours_old=24,
+                    # linkedin_fetch_description=True,
+                    # country="united states",  # Must be a valid JobSpy country
+                    company_industry="Airlines/Aviation",
+                )
+                print(f"LinkedIn scraped {len(jobs)} jobs.")
+            elif site == "indeed":
+                print("Scraping Indeed...")
+                jobs = scrape_jobs(
+                    site_name=["indeed"],
+                    search_term=keyword,
+                    results_wanted=1000,
+                    hours_old=24,
+                    country_indeed="worldwide",  # 'worldwide' is valid for Indeed
+                    company_industry="aviation"
+                )
+                print(f"Indeed scraped {len(jobs)} jobs.")
+            else:
+                print(f"⚠️ Unknown site: {site}")
+                continue
+
+            if isinstance(jobs, pd.DataFrame) and not jobs.empty:
+                all_jobs.append(jobs)
+        except Exception as e:
+            print(f"❌ Error scraping {site}: {e}")
+
+    # Combine all jobs
+    if not all_jobs:
         return pd.DataFrame()
-    jobs = jobs[jobs['title'].str.lower().str.contains(keyword, na=False)]
 
-    return jobs
+    jobs_df = pd.concat(all_jobs, ignore_index=True)
 
+    # Filter for keyword in title
+    jobs_df = jobs_df[jobs_df['title'].str.lower().str.contains(keyword.lower(), na=False)]
 
+    print(f"✅ Total '{keyword}' jobs scraped across sources: {len(jobs_df)}")
+    return jobs_df
 def format_jobs_for_discord(jobs_df: pd.DataFrame) -> str:
     if jobs_df.empty:
         return "❌ No new pilot jobs found in the last 24 hours."
@@ -44,15 +72,23 @@ def format_jobs_for_discord(jobs_df: pd.DataFrame) -> str:
 
 
 # if __name__ == "__main__":
-def get_latest_pilot_jobs(keywords):
+def get_latest_pilot_jobs(keywords,site_name=["indeed"]):
     # Keywords to search for pilot jobs
     all_jobs = []
 
     for keyword in keywords:
         print(f"Scraping jobs for keyword: {keyword}")
-        jobs_df = scrape_pilot_jobs_last_day(keyword)
+        jobs_df = scrape_pilot_jobs_last_day(keyword, site_names=site_name)
         all_jobs.append(jobs_df)
     if all_jobs:
         combined_df = pd.concat(all_jobs, ignore_index=True).drop_duplicates(subset="job_url")
         # discord_message = format_jobs_for_discord(combined_df)
         return combined_df
+
+if __name__ == "__main__":
+    keywords = ["aircraft engineer", "aviation technical manager", "aviation project manager", "aviation safety manager", "aviation quality manager", "aviation maintenance manager", "aviation operations manager", "aviation logistics manager", "aviation supply chain manager", "aviation procurement manager"]
+    latest_jobs = get_latest_pilot_jobs(keywords, site_name=[ "linkedin"])
+    if not latest_jobs.empty:
+        print(format_jobs_for_discord(latest_jobs))
+    else:
+        print("No new pilot jobs found in the last 24 hours.")
