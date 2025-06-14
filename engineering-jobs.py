@@ -3,13 +3,13 @@ from discord.ext import tasks
 import os
 from dotenv import load_dotenv
 import pandas as pd
-
+import asyncio
 from jobs.jobs import get_latest_pilot_jobs
 
 load_dotenv()
 
-DISCORD_TOKEN = os.getenv("JOB_TOKEN")
-CHANNEL_ID = 1382633883882885232  # Your Discord channel ID
+DISCORD_TOKEN = os.getenv("ENG_JOBS")
+CHANNEL_ID = 1382825652071305287  # Your Discord channel ID
 
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
@@ -25,9 +25,9 @@ async def on_ready():
 async def post_pilot_jobs():
     print("🔍 Searching for pilot job openings...")
     channel = client.get_channel(CHANNEL_ID)
-    keywords = ["pilot", "airline pilot", "commercial pilot", "private pilot", "flight instructor"]
+    keywords = ["Flight Engineer", "Aerospace Engineer", "Flight Operations", "Avionics Engineer",  "Flight Test Engineer", "Aircraft Systems Engineer", "Air Traffic Manager", "Flight Safety Engineer", "Flight Operations Engineer", "Flight Planning Engineer", "Flight Control Systems Engineer", "Flight Simulation Engineer", "Flight Operations Analyst", "Flight Operations Specialist", "Flight Operations Manager", "Flight Operations Coordinator"]
 
-    jobs = get_latest_pilot_jobs(keywords=keywords, site_name=[ "indeed", "linkedin", "zip_recruiter", "glassdoor", "google", "bayt", "naukri"])
+    jobs = await asyncio.to_thread(get_latest_pilot_jobs, keywords=keywords, site_name=[ "indeed", "linkedin", "zip_recruiter", "glassdoor", "google", "bayt", "naukri"])
 
     if jobs.empty:
         # await channel.send("❌ No new pilot jobs found in the last 24 hours.")
@@ -35,7 +35,7 @@ async def post_pilot_jobs():
 
     for _, row in jobs.iterrows():
         embed = discord.Embed(
-            title=row.get('title', 'Pilot Opportunity'),
+            title=row.get('title', 'Engineering Job'),
             url=row.get('job_url') or row.get('job_url_direct'),
             description = (
     row['description'][:300] + '...' if isinstance(row.get('description'), str)

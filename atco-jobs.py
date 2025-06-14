@@ -25,9 +25,9 @@ async def on_ready():
 async def post_pilot_jobs():
     print("🔍 Searching for pilot job openings...")
     channel = client.get_channel(CHANNEL_ID)
-    keywords = ["Air traffic Controller", "ATCO", "Air Traffic Control"]
+    keywords = ["Air traffic Controller", "Air Traffic Control", "Air Traffic Controller - Tower", "Air Traffic Controller - Approach", "Air Traffic Controller - Enroute"]
 
-    jobs = get_latest_pilot_jobs(keywords=keywords, site_name=["linkedin"])
+    jobs = get_latest_pilot_jobs(keywords=keywords, site_name=[ "indeed", "linkedin", "zip_recruiter", "glassdoor", "google", "bayt", "naukri"])
 
     if jobs.empty:
         # await channel.send("❌ No new pilot jobs found in the last 24 hours.")
@@ -35,7 +35,7 @@ async def post_pilot_jobs():
 
     for _, row in jobs.iterrows():
         embed = discord.Embed(
-            title=row.get('title', 'Pilot Opportunity'),
+            title=row.get('title', 'ATCOs Jobs'),
             url=row.get('job_url') or row.get('job_url_direct'),
             description = (
     row['description'][:300] + '...' if isinstance(row.get('description'), str)

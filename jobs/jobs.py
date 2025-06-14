@@ -14,7 +14,7 @@ def scrape_pilot_jobs_last_day(keyword: str, site_names=["indeed", "linkedin"]) 
                     site_name=["linkedin"],
                     search_term=keyword,
                     results_wanted=1000,
-                    hours_old=24,
+                    hours_old=1,
                     # linkedin_fetch_description=True,
                     # country="united states",  # Must be a valid JobSpy country
                     company_industry="Airlines/Aviation",
@@ -26,14 +26,44 @@ def scrape_pilot_jobs_last_day(keyword: str, site_names=["indeed", "linkedin"]) 
                     site_name=["indeed"],
                     search_term=keyword,
                     results_wanted=1000,
-                    hours_old=24,
+                    hours_old=2,
                     country_indeed="worldwide",  # 'worldwide' is valid for Indeed
                     company_industry="aviation"
                 )
                 print(f"Indeed scraped {len(jobs)} jobs.")
             else:
-                print(f"⚠️ Unknown site: {site}")
-                continue
+                try:
+                    print(f"Scraping {site}...")
+                    jobs = scrape_jobs(
+                        site_name=[site],
+                        search_term=keyword,
+                        results_wanted=1000,
+                        hours_old=2,
+                        # linkedin_fetch_description=True,
+                        # country="united states",  # Must be a valid JobSpy country
+                        # google_search_term=keyword,  # Optional for Google search
+                        # location="united states",  # Optional for location-based search
+                        # is_remote=True,  # Optional for remote jobs
+                        # job_type="full_time",  # Optional for job type filtering
+                        # easy_apply=True,  # Optional for easy apply jobs
+                        # description_format="html",  # Optional for description format
+                        # linkedin_company_ids=None,  # Optional for specific company IDs
+                        # offset=0,  # Optional for pagination
+                        # enforce_annual_salary=True,  # Optional for annual salary enforcement
+                        # proxies=None,  # Optional for proxy support
+                        # ca_cert=None,  # Optional for CA certificate
+                        verbose=1,  # Optional for verbosity level
+                        # country_indeed="worldwide",  # 'worldwide' is valid for Indeed
+                        company_industry="aviation"
+                    )
+                    print(f"{site.capitalize()} scraped {len(jobs)} jobs.")
+                except Exception as e:
+                    print(f"⚠️ Error scraping {site}: {e}")
+                    # Fallback to Indeed if site is unknown
+                    print("Falling back to Indeed for this keyword...")
+                    print("Scraping Indeed as fallback...")
+                
+                    continue
 
             if isinstance(jobs, pd.DataFrame) and not jobs.empty:
                 all_jobs.append(jobs)
@@ -86,9 +116,9 @@ def get_latest_pilot_jobs(keywords,site_name=["indeed"]):
         return combined_df
 
 if __name__ == "__main__":
-    keywords = ["Flight Dispatcher", "Flight Operations Officer", "Flight Operations Controller", "Flight Operations Specialist"]
+    keywords = ["Flight Dispatcher"]
 
-    latest_jobs = get_latest_pilot_jobs(keywords, site_name=[ "linkedin"])
+    latest_jobs = get_latest_pilot_jobs(keywords, site_name=[ "indeed", "linkedin", "zip_recruiter", "glassdoor", "google", "bayt", "naukri"])
     if not latest_jobs.empty:
         print(format_jobs_for_discord(latest_jobs))
     else:
