@@ -15,7 +15,7 @@ def scrape_pilot_jobs_last_day(keyword: str, site_names=["indeed", "linkedin"]) 
                     search_term=keyword,
                     results_wanted=1000,
                     hours_old=1,
-                    # linkedin_fetch_description=True,
+                    linkedin_fetch_description=True,
                     # country="united states",  # Must be a valid JobSpy country
                     company_industry="Airlines/Aviation",
                 )
