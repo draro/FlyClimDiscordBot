@@ -73,8 +73,12 @@ def scrape_pilot_jobs_last_day(keyword: str, site_names=["indeed", "linkedin"]) 
     # Combine all jobs
     if not all_jobs:
         return pd.DataFrame()
+    non_empty_jobs = [
+    df for df in all_jobs 
+    if isinstance(df, pd.DataFrame) and not df.empty and not df.dropna(how="all").empty
+    ]
 
-    jobs_df = pd.concat(all_jobs, ignore_index=True)
+    jobs_df = pd.concat(non_empty_jobs, ignore_index=True)
 
     # Filter for keyword in title
     jobs_df = jobs_df[jobs_df['title'].str.lower().str.contains(keyword.lower(), na=False)]
@@ -113,8 +117,17 @@ def get_latest_pilot_jobs(keywords,site_name=["indeed"]):
         jobs_df = scrape_pilot_jobs_last_day(keyword, site_names=site_name)
         all_jobs.append(jobs_df)
     if all_jobs:
-        combined_df = pd.concat(all_jobs, ignore_index=True).drop_duplicates(subset="job_url")
+        non_empty_jobs = [
+            df for df in all_jobs 
+            if isinstance(df, pd.DataFrame) and not df.empty and not df.dropna(how="all").empty
+            ]
+        combined_df = pd.concat(non_empty_jobs, ignore_index=True).drop_duplicates(subset="job_url")
         # discord_message = format_jobs_for_discord(combined_df)
+        # print(combined_df.head(), "Combined DataFrame with jobs")
+        # print(f"Total jobs found: {len(combined_df)}")
+        # print(combined_df['site'].unique(), "Unique sites found in the DataFrame")
+        # print("Sleeping for 20 seconds to avoid rate limiting...")
+        # time.sleep(20)
         return combined_df
 
 if __name__ == "__main__":

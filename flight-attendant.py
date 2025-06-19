@@ -27,7 +27,7 @@ async def post_pilot_jobs():
     channel = client.get_channel(CHANNEL_ID)
     keywords = ["Cabin Crew", "Flight Attendant", "Air Hostess", "Air Steward", "Flight Stewardess"]
 
-    jobs = await asyncio.to_thread(get_latest_pilot_jobs, keywords=keywords, site_name=[ "indeed", "linkedin", "zip_recruiter", "glassdoor", "google", "bayt", "naukri"])
+    jobs = await asyncio.to_thread(get_latest_pilot_jobs, keywords=keywords, site_name=[ "indeed", "linkedin","naukri"])
 
     if jobs.empty:
         # await channel.send("❌ No new pilot jobs found in the last 24 hours.")
