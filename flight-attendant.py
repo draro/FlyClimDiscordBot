@@ -8,8 +8,8 @@ from jobs.jobs import get_latest_pilot_jobs
 
 load_dotenv()
 
-DISCORD_TOKEN = os.getenv("ENG_JOBS")
-CHANNEL_ID = 1382825652071305287  # Your Discord channel ID
+DISCORD_TOKEN = os.getenv("CABIN_JOBS")
+CHANNEL_ID = 1385172536102486108  # Your Discord channel ID
 
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)

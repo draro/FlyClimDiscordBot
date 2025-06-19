@@ -1,7 +1,7 @@
 from jobspy import scrape_jobs
 import pandas as pd
 from datetime import datetime, timedelta
-
+import time
 def scrape_pilot_jobs_last_day(keyword: str, site_names=["indeed", "linkedin"]) -> pd.DataFrame:
     all_jobs = []
 
@@ -88,6 +88,8 @@ def format_jobs_for_discord(jobs_df: pd.DataFrame) -> str:
     lines = ["**✈️ Latest Pilot Jobs  in LinkedIn (Last 2h)**\n"]
 
     for _, row in jobs_df.iterrows():
+        print(row)
+        time.sleep(2)  # Sleep to avoid rate limiting
         title = row['title']
         company = row['company']
         location = ", ".join(filter(None, [row['location']]))
